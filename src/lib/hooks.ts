@@ -1,47 +1,34 @@
 import { useEffect, useState } from "react";
 import { jobItem, jobItemDescription } from "./types";
 import { BASE_URL } from "./constant";
+import { useQuery } from "@tanstack/react-query";
 
+type JobItemApiResponse = {
+  public: boolean;
+  jobItem: jobItemDescription;
+};
+
+const fetchJobItem = async (id: number): Promise<JobItemApiResponse> => {
+  const response = await fetch(`${BASE_URL}/${id}`);
+  const data = await response.json();
+  return data;
+};
+
+// using reactQueryhook
 export function useJobItem(id: number | null) {
-  const [jobItem, setJobItem] = useState<jobItemDescription | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (!id) return;
-
-    const fetchJobItemData = async () => {
-      setIsLoading(true);
-      const response = await fetch(`${BASE_URL}/${id}`);
-      const data = await response.json();
-      setJobItem(data.jobItem);
-      setIsLoading(false);
-    };
-
-    fetchJobItemData();
-  }, [id]);
-
+  const { data, isLoading } = useQuery(
+    ["job-item", id],
+    () => (id ? fetchJobItem(id) : null),
+    {
+      staleTime: 1000 * 60 * 60,
+      refetchOnWindowFocus: false,
+      retry: false,
+      enabled: Boolean(id), // another solution is to use !!id
+      onError: () => {},
+    }
+  );
+  const jobItem = data?.jobItem;
   return { jobItem, isLoading } as const;
-}
-
-export function useActiveId() {
-  const [activeJobItemId, setActiveJobItemId] = useState<number | null>(null);
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      const id = +window.location.hash.slice(1);
-      setActiveJobItemId(id);
-    };
-
-    handleHashChange();
-
-    window.addEventListener("hashchange", handleHashChange);
-
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-    };
-  }, []);
-
-  return activeJobItemId;
 }
 
 export function useJobItems(searchInputText: string) {
@@ -69,6 +56,27 @@ export function useJobItems(searchInputText: string) {
   return { jobItemsSliced, isLoading, totalNumberOfResult } as const;
 }
 
+export function useActiveId() {
+  const [activeJobItemId, setActiveJobItemId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const id = +window.location.hash.slice(1);
+      setActiveJobItemId(id);
+    };
+
+    handleHashChange();
+
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, []);
+
+  return activeJobItemId;
+}
+
 export function useDebounce<T>(value: T, delay: number): T {
   const [debounceValue, setDebounceValue] = useState(value);
 
@@ -82,3 +90,24 @@ export function useDebounce<T>(value: T, delay: number): T {
 
   return debounceValue;
 }
+
+// export function useJobItem(id: number | null) {
+//   const [jobItem, setJobItem] = useState<jobItemDescription | null>(null);
+//   const [isLoading, setIsLoading] = useState(false);
+
+//   useEffect(() => {
+//     if (!id) return;
+
+//     const fetchJobItemData = async () => {
+//       setIsLoading(true);
+//       const response = await fetch(`${BASE_URL}/${id}`);
+//       const data = await response.json();
+//       setJobItem(data.jobItem);
+//       setIsLoading(false);
+//     };
+
+//     fetchJobItemData();
+//   }, [id]);
+
+//   return { jobItem, isLoading } as const;
+// }
