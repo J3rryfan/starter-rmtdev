@@ -18,8 +18,11 @@ function App() {
   const [searchInputText, setSearchInputText] = useState("");
   const debounceSearchText = useDebounce(searchInputText, 250);
 
-  const { jobItemsSliced, isLoading, totalNumberOfResult } =
-    useJobItems(debounceSearchText);
+  const { jobItems, isLoading } = useJobItems(debounceSearchText);
+
+  const totalNumberOfResult = jobItems?.length || 0;
+
+  const jobItemsSliced = jobItems?.slice(0, 7) || [];
 
   return (
     <>
