@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { jobItem, jobItemDescription } from "./types";
 import { BASE_URL } from "./constant";
 import { useQuery } from "@tanstack/react-query";
+import { handleError } from "./utils";
 
 type JobItemApiResponse = {
   public: boolean;
@@ -29,9 +30,7 @@ export function useJobItem(id: number | null) {
       refetchOnWindowFocus: false,
       retry: false,
       enabled: Boolean(id), // another solution is to use !!id
-      onError: (error) => {
-        console.log(error);
-      },
+      onError: handleError,
     }
   );
   const jobItem = data?.jobItem;
@@ -51,6 +50,10 @@ const fetchGetJobItems = async (
   searchInputText: string
 ): Promise<JobItemsApiResponse> => {
   const response = await fetch(`${BASE_URL}?search=${searchInputText}`);
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.description);
+  }
   const data = await response.json();
   return data;
 };
@@ -64,9 +67,7 @@ export function useJobItems(searchInputText: string) {
       refetchOnWindowFocus: false,
       retry: false,
       enabled: Boolean(searchInputText),
-      onError: (error) => {
-        console.log(error);
-      },
+      onError: handleError,
     }
   );
   const jobItems = data?.jobItems;
