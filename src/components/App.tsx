@@ -28,16 +28,15 @@ function App() {
   // derived/computed state
   const totalNumberOfResult = jobItems?.length || 0;
   const totalNumberOfPages = totalNumberOfResult / RESULTS_PER_PAGE;
-  const jobItemsSorted =
-    jobItems?.sort((a, b) => {
-      if (sortBy === 'relevant') {
-        return b.relevanceScore - a.relevanceScore;
-      } else {
-        return a.daysAgo - b.daysAgo;
-      }
+  const jobItemsSorted = [...(jobItems || [])].sort((a, b) => {
+    if (sortBy === 'relevant') {
+      return b.relevanceScore - a.relevanceScore;
+    } else {
+      return a.daysAgo - b.daysAgo;
+    }
 
-      return 0;
-    }) || [];
+    return 0;
+  });
 
   const jobItemsSortedAndSliced = jobItemsSorted.slice(
     currentPage * RESULTS_PER_PAGE - RESULTS_PER_PAGE,
