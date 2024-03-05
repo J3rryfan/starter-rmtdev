@@ -1,15 +1,26 @@
-import { useState } from 'react';
+import { useState, createContext } from 'react';
+
+export const BookmarksContext = createContext(null);
 
 export default function BookmarksContextProvider({ children }) {
-  const [bookmarkIds, setBookmarkIds] = useState<number[]>([]);
+  const [bookmarkedIds, setBookmarkedIds] = useState<number[]>([]);
 
   const handleToggleBookmark = (id: number) => {
-    if (bookmarkIds.includes(id)) {
-      setBookmarkIds((prev) => prev.filter((item) => item !== id));
+    if (bookmarkedIds.includes(id)) {
+      setBookmarkedIds((prev) => prev.filter((item) => item !== id));
     } else {
-      setBookmarkIds((prev) => [...prev, id]);
+      setBookmarkedIds((prev) => [...prev, id]);
     }
   };
 
-  return <div>{children}</div>;
+  return (
+    <BookmarksContext.Provider
+      value={{
+        bookmarkedIds,
+        handleToggleBookmark,
+      }}
+    >
+      {children}
+    </BookmarksContext.Provider>
+  );
 }
