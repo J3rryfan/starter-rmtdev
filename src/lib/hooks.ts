@@ -12,8 +12,8 @@ type JobItemApiResponse = {
 const fetchJobItem = async (id: number): Promise<JobItemApiResponse> => {
   const response = await fetch(`${BASE_URL}/${id}`);
   // 4xx or 5xx
-  const errorData = await response.json();
   if (!response.ok) {
+    const errorData = await response.json();
     throw new Error(errorData.description);
   }
   const data = await response.json();
